@@ -6,6 +6,7 @@ const session = require('express-session')
 const app = express()
 const methodOverride = require("method-override")
 const morgan = require("morgan")
+const MongoStore = require("connect-mongo")
 
 // CONTROLLER
 const authCtr= require("./controllers/auth.js")
@@ -21,11 +22,11 @@ app.use(methodOverride("_method"))
 // Morgan for logging HTTP requests
 app.use(morgan('dev'))
 app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true,
-  })
+    session({
+        secret: process.env.SESSION_SECRET,
+        resave: false,
+        saveUninitialized: true,
+    })
 )
 
 // PUBLIC ROUTES
@@ -38,7 +39,14 @@ app.get("/", (req, res) => {
 app.use("/auth", authCtr)
 
 // PROTECTED ROUTES
-
+app.get("/vip-lounge", (req, res) => {
+    if (req.session.user) {
+      res.send(`Welcome to the party ${req.session.user.username}.`)
+    } else {
+      res.send("Sorry, no guests allowed.")
+    }
+})
+  
 // LISTENER
 app.listen(port, () => {
   console.log(`The express app is ready on port ${port}!`)
