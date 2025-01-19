@@ -33,7 +33,15 @@ router.post("/sign-up", async (req, res) => {
 
     // 3. Save the user in the DB
     const newUser = await User.create(req.body)
-    res.send(newUser.username)
+    req.session.user = {
+        username: user.username,
+      };
+      
+      req.session.save(() => {
+        res.redirect("/");
+      });
+      
+    // res.send(newUser.username)
 })
 
 router.get("/sign-in", (req, res) => {
@@ -63,13 +71,15 @@ router.post("/sign-in", async (req, res) => {
         _id: userInDatabase._id,
     }
 
-    res.redirect("/")
-   
+    req.session.save(() => {
+        res.redirect("/")
+    })
 })
 
 router.get("/sign-out", (req, res) => {
-    req.session.destroy()
-    res.redirect("/")
+    req.session.destroy(() => {
+        res.redirect("/")
+    })     
 })
-  
+
 module.exports = router
